@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>peakPredict — Mindpeak</title>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink-soft:#46566b; --bg:#ffffff; --bg-alt:#f5f7fa; --bg-deep:#0f1b2d;
+    --accent:#5b3df5; --accent-2:#19b9c9; --line:#e3e8ef; --radius:16px; --maxw:1140px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  a{color:inherit;text-decoration:none}
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px;letter-spacing:-.5px}
+  .logo .dot{width:13px;height:13px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .nav-links{display:flex;gap:26px;font-size:14.5px;color:var(--ink-soft);font-weight:500}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-cta{display:flex;gap:10px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14.5px;padding:10px 18px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#4a2fe0}
+  .btn-ghost{border-color:var(--line);color:var(--ink)}.btn-ghost:hover{border-color:var(--ink-soft)}
+  @media(max-width:880px){.nav-links{display:none}}
+  .hero{background:radial-gradient(900px 500px at 80% -10%,rgba(91,61,245,.12),transparent),linear-gradient(180deg,#fbfcfe,#fff);padding:74px 0 64px;border-bottom:1px solid var(--line)}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+  h1{font-size:clamp(34px,5vw,54px);line-height:1.05;letter-spacing:-1.5px;font-weight:800;max-width:14ch}
+  .hero p.lede{font-size:19px;color:var(--ink-soft);max-width:60ch;margin-top:22px}
+  .hero-cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr}}
+  section{padding:72px 0}
+  .sec-alt{background:var(--bg-alt)}
+  .sec-dark{background:var(--bg-deep);color:#e8edf4}.sec-dark h2,.sec-dark h3{color:#fff}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  .sec-dark .kicker{color:var(--accent-2)}
+  h2{font-size:clamp(26px,3.6vw,38px);line-height:1.12;letter-spacing:-1px;font-weight:800;max-width:20ch}
+  h2.center{margin:0 auto;text-align:center}
+  .sub{color:var(--ink-soft);font-size:18px;max-width:62ch;margin-top:16px}.sec-dark .sub{color:#aebccd}
+  .gaps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:40px}
+  @media(max-width:880px){.gaps{grid-template-columns:1fr}}
+  .gap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+  .gap .num{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+  .gap h4{font-size:19px;margin:8px 0 10px}.gap p{color:var(--ink-soft);font-size:15px}
+  .gap em{color:var(--ink);font-style:italic;font-weight:500;display:block;margin-top:12px;font-size:14px}
+  .solution{margin-top:42px;font-size:18px;color:var(--ink-soft);max-width:72ch}
+  .solution p+p{margin-top:16px}
+  .challenge-img{margin-top:48px;text-align:center}
+  .challenge-img img{width:100%;max-width:960px;display:block;margin:0 auto}
+  .pull{margin:46px auto 0;text-align:center;font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.5px;max-width:24ch}
+  .pull span{background:linear-gradient(transparent 65%,rgba(91,61,245,.18) 65%)}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
+  @media(max-width:880px){.feat-grid{grid-template-columns:1fr}}
+  .feat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;transition:.15s}
+  .feat:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(15,27,45,.4)}
+  .feat .ic{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,rgba(91,61,245,.15),rgba(25,185,201,.15));display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+  .feat h4{font-size:18px;margin-bottom:8px}.feat p{color:var(--ink-soft);font-size:14.5px}
+  .ben-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:40px}
+  @media(max-width:880px){.ben-grid{grid-template-columns:1fr}}
+  .ben{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:26px}
+  .ben h4{font-size:18px;margin-bottom:16px;color:#fff}.ben ul{list-style:none}
+  .ben li{position:relative;padding-left:26px;margin-bottom:13px;color:#c4d0de;font-size:14.5px}
+  .ben li:before{content:"";position:absolute;left:0;top:7px;width:13px;height:13px;border-radius:3px;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .cases{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:42px}
+  @media(max-width:880px){.cases{grid-template-columns:1fr}}
+  .case{border:1px solid var(--line);border-radius:var(--radius);padding:30px;background:#fff}
+  .case .tag{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--accent);background:rgba(91,61,245,.08);padding:5px 11px;border-radius:999px;margin-bottom:16px}
+  .case h4{font-size:21px;margin-bottom:12px}.case p{color:var(--ink-soft);font-size:15px;margin-bottom:14px}
+  .case .stat{display:flex;gap:22px;flex-wrap:wrap;margin:18px 0}.case .stat div{flex:1;min-width:110px}
+  .case .stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-1px}.case .stat span{font-size:13px;color:var(--ink-soft)}
+  .cite{font-size:12.5px;color:#7c8a9c;border-left:3px solid var(--line);padding-left:12px;font-style:italic}
+  .steps{counter-reset:s;margin-top:44px;display:grid;gap:0}
+  .step{display:grid;grid-template-columns:64px 1fr;gap:22px;padding:24px 0;border-top:1px solid var(--line)}
+  .step:last-child{border-bottom:1px solid var(--line)}
+  .step .n{counter-increment:s;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px}
+  .step .n:before{content:counter(s)}.step h4{font-size:19px;margin-bottom:6px}.step p{color:var(--ink-soft);font-size:15px;max-width:70ch}
+  .cta{background:linear-gradient(135deg,#5b3df5,#19b9c9);color:#fff;text-align:center;border-radius:24px;padding:60px 28px}
+  .cta h2{color:#fff;margin:0 auto;max-width:22ch}.cta p{color:rgba(255,255,255,.9);font-size:18px;max-width:60ch;margin:18px auto 0}
+  .cta .hero-cta{justify-content:center;margin-top:30px}
+  .btn-white{background:#fff;color:var(--accent)}.btn-outline-white{border-color:rgba(255,255,255,.6);color:#fff}
+  details{border:1px solid var(--line);border-radius:12px;margin-bottom:12px;background:#fff;overflow:hidden}
+  summary{cursor:pointer;padding:18px 22px;font-weight:600;font-size:16px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary:after{content:"+";font-size:22px;color:var(--accent)}details[open] summary:after{content:"–"}
+  details p{padding:0 22px 20px;color:var(--ink-soft);font-size:15px}
+  .faq-wrap{max-width:780px;margin:40px auto 0}
+  footer{background:#0a121e;color:#9fb0c3;padding:54px 0 30px;font-size:14px}
+  .foot-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;border-bottom:1px solid #1e2c3e;padding-bottom:30px}
+  .foot-col h5{color:#fff;font-size:14px;margin-bottom:12px}
+  .foot-col a{display:block;color:#9fb0c3;margin-bottom:7px}.foot-col a:hover{color:#fff}
+  .foot-bottom{padding-top:22px;font-size:12.5px;color:#6b7d92}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="logo"><span class="dot"></span>mindpeak</div>
+    <nav class="nav-links">
+      <a href="#">For BioPharma</a>
+      <a href="#">For Diagnostic Labs</a>
+      <a href="#">Our Technology</a>
+      <a href="#">Company</a>
+      <a href="#">Resources</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="#">Contact</a>
+      <a class="btn btn-primary" href="#cta">Book a Demo</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">peakPredict</span>
+      <h1>From tissue to precision.</h1>
+      <p class="lede">peakPredict turns routine histopathology slides into forward-looking clinical intelligence — predicting therapy response, mutation status, and recurrence risk before treatment begins.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#cta">Book a Demo →</a>
+        <a class="btn btn-ghost" href="#science">Read the Science</a>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;">
+      <img src="hero.png" alt="peakPredict outcome prediction score interface showing 84% positive prognosis forecast" style="width:100%;max-width:560px;display:block;">
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES (narrative + gaps) -->
+<section>
+  <div class="wrap">
+    <div class="kicker">The challenge</div>
+    <h2>State-of-the-art AI that reads tissue like no human can</h2>
+    <p class="sub">Cancer diagnostics have mastered classification — but clinicians still face the hardest questions.</p>
+    <div class="gaps">
+      <div class="gap">
+        <div class="num">Question 01</div>
+        <h4>Therapy response</h4>
+        <p>Predicting which patient will truly respond to a given therapy remains one of the central unsolved challenges in oncology care.</p>
+        <em>"Which patient will truly respond to this therapy?"</em>
+      </div>
+      <div class="gap">
+        <div class="num">Question 02</div>
+        <h4>Relapse risk</h4>
+        <p>Standard-of-care treatment benefits many — but a subset of patients relapse early, and identifying them proactively changes outcomes.</p>
+        <em>"Who is at risk of early relapse, despite standard-of-care?"</em>
+      </div>
+      <div class="gap">
+        <div class="num">Question 03</div>
+        <h4>Molecular status</h4>
+        <p>Genomic sequencing can reveal mutation status — but it is slow, costly, and not always available at the point of clinical decision.</p>
+        <em>"Which molecular alterations does this tumor carry — without waiting for sequencing?"</em>
+      </div>
+    </div>
+    <div class="solution">
+      <p>peakPredict answers all of these questions directly from routine H&amp;E and IHC tissue slides — the same slides already generated in the pathology workflow. No additional tissue. No costly sequencing. No delay.</p>
+      <p>By integrating histopathology, clinical, and molecular data, peakPredict delivers accurate predictions of patient outcomes, supporting more informed treatment decisions across the oncology care pathway. Built on Mindpeak's patented peakFrontier model, it extracts deep spatial, morphological, and cellular features invisible to the human eye and translates them into quantitative predictions that guide real treatment decisions.</p>
+    </div>
+    <div class="challenge-img">
+      <img src="challenge.png" alt="Mindpeak platform showing mIF, IHC and H&E tissue analysis with unified multi-channel viewer">
+    </div>
+    <div class="pull"><span>"Digital pathology was the first step. Prediction is next."</span></div>
+  </div>
+</section>
+
+<!-- FEATURES LIST -->
+<section class="sec-alt">
+  <div class="wrap">
+    <div class="kicker">Platform</div>
+    <h2>Everything tissue intelligence needs to drive clinical decisions</h2>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="ic">📊</div>
+        <h4>Go beyond standard scoring</h4>
+        <p>Biomarker complex scoring with continuous or categorical outputs tailored to your clinical or trial endpoint — not just binary calls.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">🔬</div>
+        <h4>Identify novel biomarker signatures</h4>
+        <p>Detect spatial patterns invisible to the human eye across the full whole-slide image, unlocking entirely new biomarker classes.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">🎯</div>
+        <h4>Direct treatment prediction</h4>
+        <p>Demonstrate earlier treatment efficacy by enriching your clinical trial with responders, identified pre-enrollment from existing slides.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">🔍</div>
+        <h4>Sub-cellular precision</h4>
+        <p>The peakFrontier model operates at sub-cellular resolution, capturing morphological and spatial features missed by conventional AI methods.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">⚡</div>
+        <h4>Unmatched robustness</h4>
+        <p>Validated across scanner types, staining protocols, and institutions — delivering consistent, reproducible predictions at scale.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">🧬</div>
+        <h4>Pan-tumor tissue insights</h4>
+        <p>Built with rich granular annotations across mIF, IHC, and H&amp;E modalities — applicable across multiple tumor types and indications.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="sec-dark">
+  <div class="wrap">
+    <div class="kicker">Who it's for</div>
+    <h2>Transforming outcomes across the oncology ecosystem</h2>
+    <div class="ben-grid">
+      <div class="ben">
+        <h4>Clinicians &amp; Pathologists</h4>
+        <ul>
+          <li>Objective, reproducible predictive scores to support tumor board decisions</li>
+          <li>Clear therapy response likelihood for this patient's tumor, right now</li>
+          <li>Earlier identification of high-risk patients before relapse occurs</li>
+          <li>No added tissue, no extra testing — runs on slides already acquired</li>
+        </ul>
+      </div>
+      <div class="ben">
+        <h4>BioPharma &amp; Clinical Trial Teams</h4>
+        <ul>
+          <li>De-risk Phase II/III programs through better patient selection</li>
+          <li>Eliminate location bias — standardize reads across all trial sites globally</li>
+          <li>Demonstrate earlier treatment efficacy</li>
+          <li>Faster enrollment: AI identifies eligible patients across diverse populations at scale</li>
+        </ul>
+      </div>
+      <div class="ben">
+        <h4>Patients</h4>
+        <ul>
+          <li>Receive the right therapy at the right time</li>
+          <li>Earlier detection of high-risk disease, enabling timely intervention</li>
+          <li>More personalized, data-driven care grounded in individual tumor biology</li>
+        </ul>
+      </div>
+      <div class="ben">
+        <h4>Healthcare Systems</h4>
+        <ul>
+          <li>Optimized resource allocation by avoiding futile treatment pathways</li>
+          <li>Standardized, reproducible decision support across institutions</li>
+          <li>Cost-effective alternative to comprehensive molecular testing panels</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDY -->
+<section id="science">
+  <div class="wrap">
+    <div class="kicker">Proof</div>
+    <h2>Validated in rigorous clinical research</h2>
+    <div class="cases">
+      <div class="case">
+        <span class="tag">Mutation Pre-screening</span>
+        <h4>AI-based BRCA1/2 pre-screening from routine H&amp;E slides</h4>
+        <p>Lengthy enrollment and heterogeneous patient populations in clinical trials can mask responders with non-responders, reducing signal-to-noise and trial success. peakPredict BRCA was used to automatically identify patients with BRCA1/2 mutations within mixed populations for pre-trial eligibility screening.</p>
+        <div class="stat">
+          <div><b>86%</b><span>of BRCA-positive patients correctly identified</span></div>
+          <div><b>50%</b><span>of negatives filtered out — no additional calibration</span></div>
+        </div>
+        <p class="cite">Presented at ASCO 2026. [VERIFY: confirm partner co-attribution before publishing]</p>
+      </div>
+      <div class="case">
+        <span class="tag">IO Response Prediction</span>
+        <h4>Predicting immunotherapy response in triple-negative breast cancer</h4>
+        <p>Triple-negative breast cancer is highly aggressive, and while immunotherapy offers new options, only a subset of patients responds. peakPredict was developed as an AI-supported predictive biomarker for immunotherapy response — pre-screening patients prior to trial enrollment to guide treatment selection and avoid unnecessary therapy.</p>
+        <div class="stat">
+          <div><b>459</b><span>whole-slide images across 58 institutions &amp; 13 scanner types</span></div>
+          <div><b>372,057</b><span>expert tissue and cell-level annotations</span></div>
+        </div>
+        <p class="cite">Erber R, Kochanke A, Calcagliola D, Pöpper M, Youssef A, Hamzeh A, et al. SUPERß – AI SUPported Evaluation of Immunotherapy Response in Early Triple Negative Breast Cancer. Poster presented at: European Congress of Pathology (ECP 2025); 2025 Aug 25–27; Florence, Italy. Poster ID: PS-61-899</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="sec-alt">
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2>From slide to prediction in five steps</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Tissue slide input</h4>
+          <p>Standard H&amp;E or IHC whole-slide images (WSIs) are submitted — the same slides already acquired during routine pathology workflow. No additional tissue preparation or specialized staining required.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>peakFrontier feature extraction</h4>
+          <p>Mindpeak's patented Pathology Frontier Model processes each WSI, extracting deep spatial, morphological, and cellular features invisible to the human eye across mIF, IHC, and H&amp;E modalities.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>AI biomarker model scoring</h4>
+          <p>Extracted features are passed into validated predictive models. Spatial patterns, immune infiltration dynamics, morphological class distributions, and optional clinical or molecular data are integrated to generate a composite prediction score.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Explainable output delivery</h4>
+          <p>Results are returned as continuous risk scores or categorical predictions with AI explainability (XAI), highlighting the specific tissue features most driving each prediction.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Clinical and trial decision support</h4>
+          <p>Pathologists and oncologists receive actionable, reproducible predictive insights — ready for tumor board review, patient stratification, or clinical trial enrollment decisions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="wrap">
+    <div class="cta">
+      <h2>A new era in precision medicine</h2>
+      <p>Ready to turn tissue into prediction and develop the biomarkers of the future with us? Join the clinicians, researchers, and pharma teams already working with Mindpeak to define the next standard of precision oncology.</p>
+      <div class="hero-cta">
+        <a class="btn btn-white" href="#">Explore a Partnership →</a>
+        <a class="btn btn-outline-white" href="#science">Read the Science</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec-alt">
+  <div class="wrap">
+    <div class="kicker" style="text-align:center">FAQ</div>
+    <h2 class="center">Questions, answered</h2>
+    <div class="faq-wrap">
+      <details open>
+        <summary>What tissue slide types does peakPredict work with?</summary>
+        <p>peakPredict works with standard H&amp;E and IHC whole-slide images — the same slides already generated during routine pathology workflows. No additional tissue preparation, specialized staining, or extra testing is required.</p>
+      </details>
+      <details>
+        <summary>Does peakPredict require genomic sequencing or additional testing?</summary>
+        <p>No. peakPredict extracts all predictions directly from routine histopathology slides. It is designed to deliver actionable insights — including mutation status predictions — without the cost, time, or tissue requirements of genomic sequencing.</p>
+      </details>
+      <details>
+        <summary>Which cancer types and indications does peakPredict support?</summary>
+        <p>peakPredict is built on the pan-tumor peakFrontier foundation model, trained with rich annotations across mIF, IHC, and H&amp;E modalities. Published validations include breast cancer (TNBC IO-response), BRCA1/2 mutation status prediction, and malignant melanoma immunotherapy response prediction.</p>
+      </details>
+      <details>
+        <summary>How does peakPredict integrate with existing pathology infrastructure?</summary>
+        <p>peakPredict is designed for seamless integration into existing digital pathology workflows. Slides are submitted as standard WSIs and predictions are returned as structured outputs — continuous scores or categorical classifications — compatible with standard reporting and tumor board review workflows.</p>
+      </details>
+      <details>
+        <summary>What is peakFrontier and how does it power peakPredict?</summary>
+        <p>peakFrontier is Mindpeak's patented Pathology Frontier Model — a next-generation AI engine built on proprietary neural architectures and rich, granular annotations across image modalities (mIF, IHC, H&amp;E). It operates at sub-cellular precision and delivers consistent robustness across scanner types, staining protocols, and clinical sites. peakPredict uses peakFrontier as its feature extraction backbone.</p>
+      </details>
+      <details>
+        <summary>Is peakPredict available for clinical use or research use only?</summary>
+        <p>Unless otherwise stated, peakPredict is intended for Research Use Only. For questions about clinical deployment or regulatory pathways, please contact Mindpeak directly.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-col" style="max-width:260px">
+        <div class="logo" style="color:#fff;margin-bottom:12px"><span class="dot"></span>mindpeak</div>
+        <p style="color:#7c8ea3">Decoding tissue for the future of medicine.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Products</h5>
+        <a href="#">peakDx</a>
+        <a href="#">peakPredict</a>
+        <a href="#">peakDiscover</a>
+        <a href="#">peakDeploy</a>
+        <a href="#">peakAcademy</a>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <a href="#">About Us</a>
+        <a href="#">Leadership</a>
+        <a href="#">Partners</a>
+        <a href="#">Careers</a>
+      </div>
+      <div class="foot-col">
+        <h5>Resources</h5>
+        <a href="#">News</a>
+        <a href="#">Publications</a>
+        <a href="#">Our Technology</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="foot-bottom">© Mindpeak GmbH · Zirkusweg 2, 20359 Hamburg, Germany. Unless otherwise stated, all products are intended for Research Use Only.</div>
+  </div>
+</footer>
+
+</body>
+</html>
